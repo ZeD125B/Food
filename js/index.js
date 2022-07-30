@@ -140,20 +140,27 @@ function openModalByScroll() {
 window.addEventListener('scroll', openModalByScroll);
 
 class Cards {
-    constructor(src, alt, subtitle, descr, price, parent) {
+    constructor(src, alt, subtitle, descr, price, parent, ...classes) {
         this.src = src;
         this.alt = alt;
         this.subtitle = subtitle;
         this.descr = descr;
         this.price = price;
         this.parent = document.querySelector(parent);
+        this.classes = classes;
     }
 
     render() {
         const element = document.createElement('div');
-        element.classList.add('.menu__field');
+    
+        if (this.classes.includes('menu__item') === false || this.classes.length === 0) {
+            this.classes = 'menu__item';
+            element.classList.add(this.classes);
+        } else {
+            this.classes.forEach(className => element.classList.add(className));
+        }
+        
         element.innerHTML = `
-            <div class="menu__item">
                 <img src="${this.src}" alt="${this.alt}">
                 <h3 class="menu__item-subtitle">"${this.subtitle}"</h3>
                 <div class="menu__item-descr">${this.descr}</div>
@@ -162,7 +169,6 @@ class Cards {
                     <div class="menu__item-cost">Цена:</div>
                     <div class="menu__item-total"><span>${this.price}</span> руб/день</div>
                 </div>
-            </div>
         `;
         this.parent.append(element);
     }
@@ -174,7 +180,10 @@ new Cards(
     'Меню "Фитнес',
     'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
     '229',
-    '.menu__field .container'
+    '.menu__field .container',
+    'big',
+    'menu__item'
+    
 
 ).render();
 
@@ -184,7 +193,8 @@ new Cards(
     'Премиум',
     'Меню "премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
     '550',
-    '.menu__field .container'
+    '.menu__field .container',
+    'menu__item'
 ).render();
 
 new Cards(
@@ -193,7 +203,8 @@ new Cards(
     'Меню "Постное',
     'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
     '430',
-    '.menu__field .container'
+    '.menu__field .container',
+    'menu__item'
 ).render();
 
 
