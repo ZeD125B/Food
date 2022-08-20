@@ -46,7 +46,7 @@ window.addEventListener('DOMContentLoaded', () => {
             seconds = Math.floor((t / 1000) % 60);
 
         if (t > 0) {
-            return {t, days, hours, minutes, seconds};
+            return { t, days, hours, minutes, seconds };
         } else {
             return {
                 't': 0,
@@ -93,8 +93,8 @@ window.addEventListener('DOMContentLoaded', () => {
     setClock('.timer', deadLine);
 
     const modal = document.querySelector('.modal'),
-        modalBtn= document.querySelectorAll('[data-modal]');
-        
+        modalBtn = document.querySelectorAll('[data-modal]');
+
 
     function modalOpened() {
         modal.classList.add('showItem');
@@ -110,15 +110,15 @@ window.addEventListener('DOMContentLoaded', () => {
     function modalClosing() {
         modal.classList.add('closeItem');
         modal.classList.remove('showItem');
-        document.body.classList.remove('overflowHidden');  
+        document.body.classList.remove('overflowHidden');
     }
 
-    
+
     modal.addEventListener('click', (e) => {
         const event = e.target;
         if (event === modal || e.target.getAttribute('data-close') == '') {
             modalClosing();
-            console.log(e.target.data-close);
+            console.log(e.target.data - close);
         }
     });
 
@@ -152,14 +152,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
         render() {
             const element = document.createElement('div');
-        
+
             if (this.classes.includes('menu__item') === false || this.classes.length === 0) {
                 this.classes = 'menu__item';
                 element.classList.add(this.classes);
             } else {
                 this.classes.forEach(className => element.classList.add(className));
             }
-            
+
             element.innerHTML = `
                     <img src="${this.src}" alt="${this.alt}">
                     <h3 class="menu__item-subtitle">"${this.subtitle}"</h3>
@@ -183,7 +183,7 @@ window.addEventListener('DOMContentLoaded', () => {
         '.menu__field .container',
         'big',
         'menu__item'
-        
+
 
     ).render();
 
@@ -222,17 +222,12 @@ window.addEventListener('DOMContentLoaded', () => {
     function postData(form) {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            
+
             const statusMessage = document.createElement('img');
             statusMessage.src = message.loading;
             statusMessage.classList.add('spinner');
-            
+            form.insertAdjacentElement('afterend', statusMessage);
 
-            form.insertAdjacentElement('afterend', statusMessage);                                
-
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
-            request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
 
             const formData = new FormData(form);
 
@@ -242,19 +237,23 @@ window.addEventListener('DOMContentLoaded', () => {
                 object[key] = value;
             });
 
-            const json = JSON.stringify(object);
-
-            request.send(json);
-
-            request.addEventListener('load', () => {
-                if (request.status === 200) {
-                    showThanksModal(message.success);
-                    statusMessage.remove();
-                    form.reset();
-                } else {
-                    showThanksModal(message.error);
-                }
-                
+            fetch('server.php', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(object)
+            })
+            .then(data => data.text())
+            .then(data => {
+                console.log(data);
+                showThanksModal(message.success);
+                statusMessage.remove();
+                form.reset();
+            }).catch(() => {
+                showThanksModal(message.error);
+            }).finally(() => {
+                form.reset();
             });
         });
     }
@@ -280,12 +279,6 @@ window.addEventListener('DOMContentLoaded', () => {
             prevModalDialog.classList.remove('hideContent');
             modalClosing();
         }, 4000);
-        
     }
-
 });
-
-
-
-
 
