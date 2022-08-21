@@ -1,0 +1,22 @@
+{
+  "name": "food",
+  "version": "1.0.0",
+  "description": "training course from Ivan Petrichenko",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZeD125B/Food.git"
+  },
+  "author": "Aleksandr Burdakov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ZeD125B/Food/issues"
+  },
+  "homepage": "https://github.com/ZeD125B/Food#readme",
+  "devDependencies": {
+    "json-server": "^0.17.0"
+  }
+}

@@ -118,7 +118,6 @@ window.addEventListener('DOMContentLoaded', () => {
         const event = e.target;
         if (event === modal || e.target.getAttribute('data-close') == '') {
             modalClosing();
-            console.log(e.target.data - close);
         }
     });
 
@@ -174,38 +173,22 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    new Cards(
-        'img/tabs/vegy.jpg',
-        'vegy',
-        'Меню "Фитнес',
-        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
-        '229',
-        '.menu__field .container',
-        'big',
-        'menu__item'
+    const getResourse = async (url) => {
+        const res = await fetch(url);
 
+        if (!res.ok) {
+            throw new Error(`Could not fetch ${url}, status ${res.status}`);
+        }
 
-    ).render();
+        return await res.json();
+    };
 
-    new Cards(
-        'img/tabs/elite.jpg',
-        'elite',
-        'Премиум',
-        'Меню "премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
-        '550',
-        '.menu__field .container',
-        'menu__item'
-    ).render();
-
-    new Cards(
-        'img/tabs/post.jpg',
-        'post',
-        'Меню "Постное',
-        'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
-        '430',
-        '.menu__field .container',
-        'menu__item'
-    ).render();
+    getResourse('http://localhost:3000/menu')
+        .then(data => {
+            data.forEach(({img, altImg, title, descr, price}) =>{
+                new Cards(img, altImg, title, descr, price, '.menu .container').render();
+            });
+        });
 
     const forms = document.querySelectorAll('form');
 
@@ -216,10 +199,22 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     forms.forEach(item => {
-        postData(item);
+        bindPostData(item);
     });
 
-    function postData(form) {
+    const postData = async (url, data) => {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: data
+        });
+
+        return await res.json();
+    };
+
+    function bindPostData(form) {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -228,33 +223,21 @@ window.addEventListener('DOMContentLoaded', () => {
             statusMessage.classList.add('spinner');
             form.insertAdjacentElement('afterend', statusMessage);
 
-
             const formData = new FormData(form);
 
-            const object = {};
+            const json = JSON.stringify(Object.fromEntries(formData.entries()));
 
-            formData.forEach((value, key) => {
-                object[key] = value;
-            });
-
-            fetch('server.php', {
-                method: 'POST',
-                headers: {
-                    'Content-type': 'application/json'
-                },
-                body: JSON.stringify(object)
-            })
-            .then(data => data.text())
-            .then(data => {
-                console.log(data);
-                showThanksModal(message.success);
-                statusMessage.remove();
-                form.reset();
-            }).catch(() => {
-                showThanksModal(message.error);
-            }).finally(() => {
-                form.reset();
-            });
+            postData('http://localhost:3000/requests', json)
+                .then(data => {
+                    console.log(data);
+                    showThanksModal(message.success);
+                    statusMessage.remove();
+                    form.reset();
+                }).catch(() => {
+                    showThanksModal(message.error);
+                }).finally(() => {
+                    form.reset();
+                });
         });
     }
 
@@ -280,5 +263,8 @@ window.addEventListener('DOMContentLoaded', () => {
             modalClosing();
         }, 4000);
     }
-});
 
+    fetch('http://localhost:3000/menu')
+        .then(data => data.json())
+        .then(res => console.log(res));
+});
