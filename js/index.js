@@ -97,8 +97,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
     function modalOpened() {
-        modal.classList.add('showItem');
-        modal.classList.remove('closeItem');
+        modal.classList.add('show');
+        modal.classList.remove('hide');
         document.body.classList.add('overflowHidden');
         clearInterval(timerModal);
     }
@@ -109,7 +109,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     function modalClosing() {
         modal.classList.add('closeItem');
-        modal.classList.remove('showItem');
+        modal.classList.remove('show');
         document.body.classList.remove('overflowHidden');
     }
 
@@ -183,9 +183,10 @@ window.addEventListener('DOMContentLoaded', () => {
         return await res.json();
     };
 
-    getResourse('http://localhost:3000/menu')
+
+    axios.get('http://localhost:3000/menu')
         .then(data => {
-            data.forEach(({img, altImg, title, descr, price}) =>{
+            data.data.forEach(({ img, altImg, title, descr, price }) => {
                 new Cards(img, altImg, title, descr, price, '.menu .container').render();
             });
         });
@@ -258,7 +259,7 @@ window.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.modal').append(thanksModal);
         setTimeout(() => {
             thanksModal.remove();
-            prevModalDialog.classList.add('showItem');
+            prevModalDialog.classList.add('show');
             prevModalDialog.classList.remove('hideContent');
             modalClosing();
         }, 4000);
@@ -267,4 +268,52 @@ window.addEventListener('DOMContentLoaded', () => {
     fetch('http://localhost:3000/menu')
         .then(data => data.json())
         .then(res => console.log(res));
+
+    const slides = document.querySelectorAll('.offer__slide');
+    const nextSlide = document.querySelector('.offer__slider-next');
+    const prevSlide = document.querySelector('.offer__slider-prev');
+    const currentSlide = document.querySelector('#current');
+    const totalSlide = document.querySelector('#total');
+
+    let slideIndex = 1;
+
+    if (slides.length < 10) {
+        totalSlide.textContent = `
+            0${slides.length}`;
+    } else {
+        totalSlide.textContent = slides.length;
+    }
+
+    function showSlides(n) {
+        if (slideIndex > slides.length) {
+            slideIndex = 1;
+        }
+
+        if (slideIndex < 1) {
+            slideIndex = slides.length;
+        }
+
+        if (slideIndex < 10) {
+            currentSlide.textContent = `0${slideIndex}`;
+        } else {
+            currentSlide.cssText = slideIndex;
+        }
+
+        slides.forEach(item => item.classList.add('hide'));
+        slides[slideIndex - 1].classList.remove('hide');
+    }
+
+    function changeSlide(n) {
+        showSlides(slideIndex += n);
+    }
+
+    nextSlide.addEventListener('click', () => {
+        changeSlide(1);
+    });
+
+    prevSlide.addEventListener('click', () => {
+        changeSlide(-1);
+    });
+
+    showSlides(slideIndex);
 });
