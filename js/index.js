@@ -296,11 +296,15 @@ window.addEventListener('DOMContentLoaded', () => {
         slide.style.width = width;
     });
 
+    function removeWords(word) {
+        return +word.replace(/\D+/g, "");
+    }
+
     nextSlide.addEventListener('click', () => {
-        if (offset == +width.replace(/\D+/g, "") * (slides.length - 1)) {
+        if (offset == removeWords(width) * (slides.length - 1)) {
             offset = 0;
         } else {
-            offset += +width.replace(/\D+/g, "");
+            offset += removeWords(width);
         }
 
         slidesField.style.transform = `translateX(-${offset}px)`;
@@ -317,9 +321,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
     prevSlide.addEventListener('click', () => {
         if (offset == 0) {
-            offset = +width.replace(/\D+/g, "") * (slides.length - 1);
+            offset = removeWords(width) * (slides.length - 1);
         } else {
-            offset -= +width.replace(/\D+/g, "");
+            offset -= removeWords(width);
         }
 
         slidesField.style.transform = `translateX(-${offset}px)`;
