@@ -39,8 +39,8 @@ window.addEventListener('DOMContentLoaded', () => {
   function getTimeRemaining(endtime) {
     const t = Date.parse(endtime) - Date.parse(new Date());
     const days = Math.floor(t / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((t / (1000 * 60 * 60) % 24));
-    const minutes = Math.floor((t / (1000 * 60) % 60));
+    const hours = Math.floor(((t / (1000 * 60 * 60)) % 24));
+    const minutes = Math.floor(((t / (1000 * 60)) % 60));
     const seconds = Math.floor((t / 1000) % 60);
 
     if (t > 0) {
@@ -91,15 +91,17 @@ window.addEventListener('DOMContentLoaded', () => {
   const modal = document.querySelector('.modal');
   const modalBtn = document.querySelectorAll('[data-modal]');
 
-  function modalOpened() {
+  function modalOpened(timer) {
     modal.classList.add('show');
     modal.classList.remove('hide');
     document.body.classList.add('overflowHidden');
-    clearInterval(timerModal);
+    clearInterval(timer);
   }
 
+  const timerModal = setTimeout(modalOpened, 6000);
+
   modalBtn.forEach((item) => {
-    item.addEventListener('click', () => modalOpened());
+    item.addEventListener('click', () => modalOpened(timerModal));
   });
 
   function modalClosing() {
@@ -110,7 +112,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   modal.addEventListener('click', (e) => {
     const event = e.target;
-    if (event === modal || e.target.getAttribute('data-close') == '') {
+    if (event === modal || e.target.getAttribute('data-close') === '') {
       modalClosing();
     }
   });
@@ -120,8 +122,6 @@ window.addEventListener('DOMContentLoaded', () => {
       modalClosing();
     }
   });
-
-  const timerModal = setTimeout(modalOpened, 6000);
 
   function openModalByScroll() {
     if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.offsetHeight - 1) {
@@ -167,16 +167,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  const getResourse = async (url) => {
-    const res = await fetch(url);
-
-    if (!res.ok) {
-      throw new Error(`Could not fetch ${url}, status ${res.status}`);
-    }
-
-    return await res.json();
-  };
-
+  // eslint-disable-next-line no-undef
   axios.get('http://localhost:3000/menu')
     .then((data) => {
       data.data.forEach(({
@@ -194,20 +185,40 @@ window.addEventListener('DOMContentLoaded', () => {
     error: 'Что-то пошло не так',
   };
 
-  forms.forEach((item) => {
-    bindPostData(item);
-  });
-
   const postData = async (url, data) => {
-    const res = await fetch(url, {
+    const result = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
       },
       body: data,
     });
-    return await res.json();
+    const req = await result.json();
+    return req;
   };
+
+  function showThanksModal(report) {
+    const prevModalDialog = document.querySelector('.modal__dialog');
+    prevModalDialog.classList.add('hideContent');
+    modalOpened();
+
+    const thanksModal = document.createElement('div');
+    thanksModal.classList.add('modal__dialog');
+    thanksModal.innerHTML = `
+            <div class="modal__content">
+                <div class="modal__close data-close">&times;</div>
+                <div class="modal__title">${report}</div>
+            </div>
+        `;
+
+    document.querySelector('.modal').append(thanksModal);
+    setTimeout(() => {
+      thanksModal.remove();
+      prevModalDialog.classList.add('show');
+      prevModalDialog.classList.remove('hideContent');
+      modalClosing();
+    }, 4000);
+  }
 
   function bindPostData(form) {
     form.addEventListener('submit', (e) => {
@@ -222,7 +233,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
       const json = JSON.stringify(Object.fromEntries(formData.entries()));
       postData('http://localhost:3000/requests', json)
-        .then((data) => {
+        .then(() => {
           showThanksModal(message.success);
           statusMessage.remove();
           form.reset();
@@ -234,28 +245,9 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function showThanksModal(message) {
-    const prevModalDialog = document.querySelector('.modal__dialog');
-    prevModalDialog.classList.add('hideContent');
-    modalOpened();
-
-    const thanksModal = document.createElement('div');
-    thanksModal.classList.add('modal__dialog');
-    thanksModal.innerHTML = `
-            <div class="modal__content">
-                <div class="modal__close data-close">&times;</div>
-                <div class="modal__title">${message}</div>
-            </div>
-        `;
-
-    document.querySelector('.modal').append(thanksModal);
-    setTimeout(() => {
-      thanksModal.remove();
-      prevModalDialog.classList.add('show');
-      prevModalDialog.classList.remove('hideContent');
-      modalClosing();
-    }, 4000);
-  }
+  forms.forEach((item) => {
+    bindPostData(item);
+  });
 
   const slides = document.querySelectorAll('.offer__slide');
   const slider = document.querySelector('.offer__slider');
@@ -285,56 +277,20 @@ window.addEventListener('DOMContentLoaded', () => {
   slidesField.style.width = `${100 * slides.length}%`;
 
   slides.forEach((slide) => {
-    slide.style.width = width;
+    const current = slide;
+    current.style.width = width;
   });
 
   function removeWords(word) {
     return +word.replace(/\D+/g, '');
   }
 
-  nextSlide.addEventListener('click', () => {
-    if (offset == removeWords(width) * (slides.length - 1)) {
-      offset = 0;
-    } else {
-      offset += removeWords(width);
-    }
-
-    slidesField.style.transform = `translateX(-${offset}px)`;
-    if (slideIndex == slides.length) {
-      slideIndex = 1;
-    } else {
-      slideIndex++;
-    }
-
-    getCarouselNumber();
-    currentCarouselDot();
-  });
-
-  prevSlide.addEventListener('click', () => {
-    if (offset == 0) {
-      offset = removeWords(width) * (slides.length - 1);
-    } else {
-      offset -= removeWords(width);
-    }
-
-    slidesField.style.transform = `translateX(-${offset}px)`;
-
-    if (slideIndex === 1) {
-      slideIndex = slides.length;
-    } else {
-      slideIndex--;
-    }
-
-    getCarouselNumber();
-    currentCarouselDot();
-  });
-
   const indicators = document.createElement('ol');
 
   indicators.classList.add('carousel-indicators');
   slider.append(indicators);
 
-  for (let i = 0; i < slides.length; i++) {
+  for (let i = 0; i < slides.length; i += 1) {
     const dot = document.createElement('li');
     dot.setAttribute('data-slide-to', i + 1);
     dot.classList.add('dot');
@@ -355,6 +311,43 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  nextSlide.addEventListener('click', () => {
+    if (offset === removeWords(width) * (slides.length - 1)) {
+      offset = 0;
+    } else {
+      offset += removeWords(width);
+    }
+
+    slidesField.style.transform = `translateX(-${offset}px)`;
+    if (slideIndex === slides.length) {
+      slideIndex = 1;
+    } else {
+      slideIndex += 1;
+    }
+
+    getCarouselNumber();
+    currentCarouselDot();
+  });
+
+  prevSlide.addEventListener('click', () => {
+    if (offset === 0) {
+      offset = removeWords(width) * (slides.length - 1);
+    } else {
+      offset -= removeWords(width);
+    }
+
+    slidesField.style.transform = `translateX(-${offset}px)`;
+
+    if (slideIndex === 1) {
+      slideIndex = slides.length;
+    } else {
+      slideIndex -= 1;
+    }
+
+    getCarouselNumber();
+    currentCarouselDot();
+  });
 
   carouselIndicators.addEventListener('click', (e) => {
     const { target } = e;
@@ -417,8 +410,8 @@ window.addEventListener('DOMContentLoaded', () => {
           localStorage.setItem('sex', e.target.getAttribute('id'));
         }
 
-        elements.forEach((elem) => {
-          elem.classList.remove(activeClass);
+        elements.forEach((element) => {
+          element.classList.remove(activeClass);
         });
 
         e.target.classList.add(activeClass);
@@ -465,6 +458,7 @@ window.addEventListener('DOMContentLoaded', () => {
         case 'weight':
           weight = +input.value;
           break;
+        default:
       }
       calcTotal();
     });
