@@ -53,6 +53,7 @@ export default function getThanksModal(modalSelector) {
           form.reset();
         }).catch(() => {
           showThanksModal(message.error);
+          statusMessage.remove();
         }).finally(() => {
           form.reset();
         });
