@@ -3,10 +3,14 @@
   "version": "1.0.0",
   "description": "training course from Ivan Petrichenko",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "lint": "eslint ./js",
-    "lint:fix": "eslint ./js --fix --color",
-    "server": "npx json-server ./db.json"
+    "lint": "eslint ./src",
+    "lint:fix": "eslint ./src --fix --color",
+    "server": "npx json-server ./src/database.json",
+    "dev": "npx webpack --mode development",
+    "build": "npx webpack --mode production",
+    "watch": "npx webpack --mode development --watch"
   },
   "repository": {
     "type": "git",
@@ -19,20 +23,28 @@
   },
   "homepage": "https://github.com/ZeD125B/Food#readme",
   "devDependencies": {
+    "@types/html-webpack-plugin": "^3.2.6",
+    "clean-webpack-plugin": "^4.0.0",
+    "css-loader": "^6.7.1",
+    "csv-loader": "^3.0.5",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-html": "^7.1.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsx-a11y": "^6.6.1",
     "eslint-plugin-prettier": "^4.2.1",
+    "html-webpack-plugin": "^5.5.0",
     "husky": "^4.3.8",
     "json-server": "^0.17.0",
     "lint-staged": "^13.0.3",
     "prettier": "^2.7.1",
-    "webpack-cli": "^4.10.0"
-  },
-  "dependencies": {
+    "style-loader": "^3.3.1",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0",
+    "xml-loader": "^1.2.1",
     "eslint": "^8.23.0",
     "eslint-config-airbnb-base": "^15.0.0"
+  },
+  "dependencies": {
   },
   "husky": {
     "hooks": {
@@ -40,7 +52,7 @@
     }
   },
   "lint-staged": {
-    "*.js": [
+    "*./js": [
       "npm run lint:fix",
       "git add"
     ]

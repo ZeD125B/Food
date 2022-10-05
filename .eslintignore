@@ -1,4 +1,7 @@
 node_modules
 /.vscode
 /.git
-./webpackconfig
+./dist
+webpack.config.js
+package.json
+database.json
